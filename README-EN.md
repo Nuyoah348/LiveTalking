@@ -85,15 +85,23 @@ Linux CUDA environment setup: <https://zhuanlan.zhihu.com/p/674972886>
 | Google Drive | <https://drive.google.com/drive/folders/1FOC_MD6wdogyyX_7V1d4NDIO7P9NlSAJ?usp=sharing> |
 
 1. Copy `wav2lip256.pth` to the project's `models/` directory and rename it to `wav2lip.pth`
-2. Extract `wav2lip256_avatar1.tar.gz` and copy the entire extracted folder to `data/avatars/`
+2. The education-themed `teacher-tutor` avatar data is bundled in `data/avatars/`. To use the original sample avatar instead, extract `wav2lip256_avatar1.tar.gz` into that directory.
 
 ### 2.2 Start the Server
 
 ```bash
-python app.py --transport webrtc --model wav2lip --avatar_id wav2lip256_avatar1
+python app.py --transport webrtc --model wav2lip --avatar_id teacher-tutor
 ```
 
 > **Note**: The server must open ports TCP:8010, UDP:1-65536
+
+**Local Qwen integration slot:** Set `llm_base_url` and `llm_model` in `config.yaml` with `llm_provider: local`. The URL must be reachable from the LiveTalking server and point to an OpenAI-compatible `/v1` API root; the model ID must match the serving process. Set `LOCAL_LLM_API_KEY` in `.env` only if authentication is required. Until configured, chat returns a clear error while echo mode remains usable. A non-compatible serving protocol needs an adapter in `llm.py`.
+
+```yaml
+llm_provider: local
+llm_base_url: 'http://<model-service-address>/v1'
+llm_model: '<served-model-id>'
+```
 
 ### 2.3 Client Access
 

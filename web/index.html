@@ -1,416 +1,73 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveTalking - 数字人实时驱动</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        :root {
-            --primary: #4361ee;
-            --primary-dark: #3f37c9;
-            --bg: #f0f4fc;
-            --card-bg: rgba(255,255,255,0.85);
-            --radius: 14px;
-        }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            color: #1e293b;
-            min-height: 100vh;
-            padding-bottom: 40px;
-        }
-        .navbar-brand { font-weight: 700; }
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.4);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
-        }
-        .card-header {
-            background: transparent;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding: 16px 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .card-header i { color: var(--primary); }
-        .card-body { padding: 20px; }
-        .btn-primary-custom {
-            background: linear-gradient(135deg, #4361ee, #3f37c9);
-            border: none;
-            color: #fff;
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-primary-custom:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(67,97,238,0.3); color: #fff; }
-        .btn-primary-custom:active { transform: translateY(0); }
-        .btn-danger-custom { background: #ef4444; border: none; color: #fff; font-weight: 600; border-radius: 8px; padding: 8px 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .btn-danger-custom:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(239,68,68,0.3); }
-        .btn-danger-custom:active { transform: translateY(0); }
-        .btn-outline-custom { border: 2px solid var(--primary); color: var(--primary); font-weight: 600; border-radius: 8px; padding: 8px 16px; background: transparent; cursor: pointer; transition: all 0.2s; }
-        .btn-outline-custom:hover { background: var(--primary); color: #fff; }
-        .btn-outline-custom:active { transform: scale(0.97); }
-        video { width: 100%; border-radius: 8px; background: #000; }
-        .session-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; }
-        .connected { background: #d1fae5; color: #065f46; }
-        .disconnected { background: #fee2e2; color: #991b1b; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-        .status-dot.on { background: #10b981; }
-        .status-dot.off { background: #ef4444; }
-        .quick-link { text-decoration: none; }
-        .quick-link .glass-card { transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
-        .quick-link:hover .glass-card { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
-        pre { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; font-size: 0.8rem; max-height: 120px; overflow-y: auto; }
-        label { font-weight: 500; font-size: 0.9rem; color: #64748b; margin-bottom: 4px; }
-        .param-hint { font-size: 0.75rem; color: #94a3b8; }
-        ::placeholder { color: #9ca3af !important; opacity: 1; }
-        :-ms-input-placeholder { color: #9ca3af; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7faf8">
+  <title>智学同行 · AI 教育数字人</title>
+  <link rel="stylesheet" href="/education.css">
+  <script src="/education.js" defer></script>
 </head>
 <body>
-
-<nav class="navbar navbar-dark" style="background: linear-gradient(135deg, #4361ee, #3f37c9); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-    <div class="container-fluid px-4">
-        <span class="navbar-brand"><i class="bi bi-camera-video-fill me-2"></i>LiveTalking</span>
-        <a href="/index-en.html" class="text-white-50 small text-decoration-none me-2">English</a>
-        <div class="d-flex gap-2">
-            <span class="session-badge disconnected" id="statusBadge"><span class="status-dot off"></span>未连接</span>
-            <span class="text-white-50 small" id="sessionIdDisplay">SID: -</span>
-        </div>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✳</span><span>智学同行 <small>/ 教育数字人讲解</small></span></div>
+      <nav class="top-links" aria-label="辅助导航">
+        <a href="/avatar.html">形象管理</a><a href="/tts/index.html">语音管理</a><a href="/admin.html">运行状态</a>
+        <span class="top-status" id="statusBadge">未连接</span>
+      </nav>
     </div>
-</nav>
-
-<div class="container mt-4">
-    <!-- Quick Links -->
-    <div class="row g-3 mb-2">
-        <div class="col-md-3">
-            <a href="/avatar.html" class="quick-link" target="_blank">
-                <div class="glass-card p-3 text-center">
-                    <i class="bi bi-person-bounding-box fs-2" style="color: #4361ee;"></i>
-                    <div class="fw-bold mt-2">Avatar 生成</div>
-                    <div class="small text-muted">创建数字人形象</div>
-                </div>
-            </a>
+  </header>
+  <main class="shell">
+    <section class="intro" aria-labelledby="pageTitle">
+      <div><div class="eyebrow">AI LEARNING COMPANION</div><h1 id="pageTitle">把知识讲清楚，让每次提问都有收获。</h1><p>与 AI 教师讨论知识点和解题思路，听数字人用自然的声音讲解。</p></div>
+      <div class="intro-note"><span aria-hidden="true">✦</span> 从提问到理解，一起向前一步</div>
+    </section>
+    <div class="workspace">
+      <section class="panel teacher-panel" aria-labelledby="teacherTitle">
+        <div class="panel-head"><h2 class="panel-title" id="teacherTitle"><span class="section-icon" aria-hidden="true">✦</span> 数字人课堂</h2><span class="panel-caption">实时音视频</span></div>
+        <div class="stage">
+          <img id="teacherPreview" src="/assets/teacher-avatar.png" alt="AI 教师形象预览">
+          <video id="video" autoplay playsinline muted hidden aria-label="数字人实时视频"></video>
+          <span class="stage-tag" id="stageTag">形象预览</span>
+          <div class="teacher-label"><div><strong>小知 · AI 教师</strong><small id="avatarDisplay">连接后显示服务端数字人</small></div><small class="english-label">VIRTUAL LEARNING TUTOR</small></div>
+          <audio id="audio" autoplay></audio>
         </div>
-        <div class="col-md-3">
-            <a href="/admin.html" class="quick-link" target="_blank">
-                <div class="glass-card p-3 text-center">
-                    <i class="bi bi-speedometer2 fs-2" style="color: #4361ee;"></i>
-                    <div class="fw-bold mt-2">管理后台</div>
-                    <div class="small text-muted">监控会话与配置</div>
-                </div>
-            </a>
+        <div class="stage-caption" id="previewCaption">连接前展示 AI 教师预览图；连接后由服务端驱动实时口型与音视频。</div>
+        <div class="connection"><div class="connection-copy"><strong id="connectionTitle">准备好开始交流了吗？</strong><small id="sessionIdDisplay">请先连接数字人服务</small></div><div class="button-row"><button type="button" class="btn btn-primary" id="btnStart">▶ 开始连接</button><button type="button" class="btn btn-danger" id="btnStop" hidden>断开连接</button></div></div>
+      </section>
+      <section class="panel consult-panel" aria-labelledby="consultTitle">
+        <div class="panel-head"><h2 class="panel-title" id="consultTitle"><span class="section-icon" aria-hidden="true">✎</span> 开始学习</h2><span class="panel-caption">文字提问 · 语音讲解</span></div>
+        <div class="consult-body">
+          <div class="hello"><span class="hello-icon" aria-hidden="true">✦</span><div><strong>你好，我是小知</strong><p>可以问我知识点、习题或学习方法。连接后，我会通过数字人音视频讲解。</p></div></div>
+          <div class="prompt-title">你可以这样开始</div>
+          <div class="prompts"><button class="prompt" type="button" data-prompt="分数的分母表示什么？请举一个简单例子。">理解分数</button><button class="prompt" type="button" data-prompt="怎样理解一元一次方程？">学习方程</button><button class="prompt" type="button" data-prompt="光合作用为什么需要阳光？">探索科学</button></div>
+          <label class="field" for="txtMessage"><span class="field-label">输入学习问题</span><textarea class="control" id="txtMessage" placeholder="例如：这道题为什么要先通分？"></textarea></label>
+          <div class="compose-row"><div class="compose-options"><select id="txtType" class="control" aria-label="交流模式"><option value="chat">智能回答</option><option value="echo">原文播报</option></select><label class="check"><input type="checkbox" id="txtInterrupt" checked> 打断当前播报</label></div><button type="button" class="btn btn-primary" id="btnSend" disabled>发送并聆听 →</button></div>
+          <div id="notice" class="notice info" role="status" aria-live="polite">连接数字人后即可发送内容。</div>
+          <p class="setting-note" id="llmHint">正在读取大模型配置…</p>
+          <p class="hintline">完整的教育智能体体验请从 DeepTutor 的“数字人讲解”入口访问；本页是数字人服务的独立调试界面。智能回答需要配置模型，原文播报无需大模型。</p>
         </div>
-        <div class="col-md-3">
-            <a href="/tts/index.html" class="quick-link" target="_blank">
-                <div class="glass-card p-3 text-center">
-                    <i class="bi bi-soundwave fs-2" style="color: #4361ee;"></i>
-                    <div class="fw-bold mt-2">TTS 语音管理</div>
-                    <div class="small text-muted">语音列表 · 克隆 · 合成</div>
-                </div>
-            </a>
-        </div>
+      </section>
     </div>
-
-    <div class="row">
-        <!-- Left Column: Connection + Video -->
-        <div class="col-lg-7">
-            <!-- 1. WebRTC Connection -->
-            <div class="glass-card">
-                <div class="card-header"><i class="bi bi-broadcast"></i> WebRTC 连接</div>
-                <div class="card-body">
-                    <div class="row g-2 align-items-end mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Avatar ID</label>
-                            <input type="text" class="form-control form-control-sm" id="offerAvatar" placeholder="wav2lip256_avatar1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">参考音频</label>
-                            <input type="text" class="form-control form-control-sm" id="offerRefAudio" placeholder="zh-CN-YunxiaNeural">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">参考音频文本</label>
-                            <input type="text" class="form-control form-control-sm" id="offerRefText" placeholder="参考文本（可选）">
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn-primary-custom" id="btnStart" onclick="start()"><i class="bi bi-play-fill"></i> 开始连接</button>
-                        <button class="btn-danger-custom" id="btnStop" onclick="stop()" style="display:none;"><i class="bi bi-stop-fill"></i> 断开连接</button>
-                    </div>
-                    <div id="offerError" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
-                    <div class="mt-3">
-                        <video id="video" autoplay playsinline muted controls></video>
-                        <audio id="audio" autoplay></audio>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Drivers + Actions -->
-        <div class="col-lg-5">
-            <!-- 2. Text Driver -->
-            <div class="glass-card">
-                <div class="card-header"><i class="bi bi-chat-text-fill"></i> 文本驱动 (POST /human)</div>
-                <div class="card-body">
-                    <div class="mb-2">
-                        <label class="form-label">输入文本 <span class="param-hint">(type: echo/chat)</span></label>
-                        <textarea class="form-control form-control-sm" id="txtMessage" rows="2" placeholder="输入要播报的文本...">你好，欢迎使用LiveTalking</textarea>
-                    </div>
-                    <div class="d-flex gap-2 align-items-end">
-                        <select class="form-select form-select-sm" style="width:120px;" id="txtType">
-                            <option value="echo">Echo 复读</option>
-                            <option value="chat">Chat LLM</option>
-                        </select>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="txtInterrupt" checked>
-                            <label class="form-check-label small">打断</label>
-                        </div>
-                        <button class="btn-primary-custom btn-sm ms-auto" onclick="sendText()"><i class="bi bi-send"></i> 发送</button>
-                        <button class="btn-outline-custom btn-sm" onclick="interrupt()"><i class="bi bi-stop-circle"></i> 打断</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Audio Upload -->
-            <div class="glass-card">
-                <div class="card-header"><i class="bi bi-mic-fill"></i> 音频驱动 (POST /humanaudio)</div>
-                <div class="card-body">
-                    <input type="file" class="form-control form-control-sm mb-2" id="audioFile" accept="audio/*">
-                    <button class="btn-primary-custom btn-sm" onclick="uploadAudio()"><i class="bi bi-upload"></i> 上传并播放</button>
-                </div>
-            </div>
-
-            <!-- 4. Recording -->
-            <div class="glass-card">
-                <div class="card-header"><i class="bi bi-record-circle"></i> 录制控制 (POST /record)</div>
-                <div class="card-body">
-                    <div class="d-flex gap-2">
-                        <button class="btn-outline-custom btn-sm" id="btnRecToggle" onclick="toggleRecord()"><i class="bi bi-record-circle"></i> 开始录制</button>
-                        <button class="btn-outline-custom btn-sm" id="btnDownload" onclick="downloadRecord()" disabled><i class="bi bi-download"></i> 下载录像</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. Custom State -->
-            <div class="glass-card">
-                <div class="card-header"><i class="bi bi-sliders"></i> 动作编排 (POST /set_audiotype)</div>
-                <div class="card-body">
-                    <div class="row g-2 align-items-end">
-                        <div class="col-6">
-                            <label class="form-label">Audiotype 索引</label>
-                            <input type="number" class="form-control form-control-sm" id="audiotypeVal" value="2" min="2">
-                        </div>
-                        <div class="col-6">
-                            <button class="btn-primary-custom btn-sm w-100" onclick="setAudiotype()"><i class="bi bi-arrow-right-circle"></i> 切换状态</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<script>
-let pc = null;
-let sessionid = null;
-
-function updateStatus(connected) {
-    const badge = document.getElementById('statusBadge');
-    if (connected) {
-        badge.className = 'session-badge connected';
-        badge.innerHTML = '<span class="status-dot on"></span>已连接';
-    } else {
-        badge.className = 'session-badge disconnected';
-        badge.innerHTML = '<span class="status-dot off"></span>未连接';
-    }
-}
-
-function setSessionId(sid) {
-    sessionid = sid;
-    document.getElementById('sessionIdDisplay').textContent = 'SID: ' + (sid || '-');
-}
-
-function showError(msg) {
-    const el = document.getElementById('offerError');
-    el.textContent = msg;
-    el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 8000);
-}
-
-// ─── WebRTC ────────────────────────────────────────────────
-function negotiate() {
-    pc.addTransceiver('video', { direction: 'recvonly' });
-    pc.addTransceiver('audio', { direction: 'recvonly' });
-    return pc.createOffer().then(offer => pc.setLocalDescription(offer)).then(() => {
-        return new Promise(resolve => {
-            if (pc.iceGatheringState === 'complete') resolve();
-            else {
-                const check = () => { if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', check); resolve(); } };
-                pc.addEventListener('icegatheringstatechange', check);
-            }
-        });
-    }).then(() => {
-        const offer = pc.localDescription;
-        const body = {
-            sdp: offer.sdp,
-            type: offer.type,
-            avatar: document.getElementById('offerAvatar').value || undefined,
-            refaudio: document.getElementById('offerRefAudio').value || undefined,
-            reftext: document.getElementById('offerRefText').value || undefined,
-        };
-        return fetch('/offer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    }).then(res => res.json()).then(answer => {
-        // 检查服务端返回的错误码
-        if (answer.code && answer.code !== 0) {
-            throw new Error(answer.msg || 'Unknown server error');
-        }
-        if (!answer.sdp) {
-            throw new Error('Server returned no SDP');
-        }
-        if (answer.sessionid) setSessionId(answer.sessionid);
-        return pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: answer.sdp }));
-    }).catch(e => {
-        const msg = e.message || String(e);
-        showError(msg);
-        // 出错时重置连接状态
-        if (pc) { pc.close(); pc = null; }
-        updateStatus(false);
-        setSessionId(null);
-        document.getElementById('btnStart').style.display = 'inline-block';
-        document.getElementById('btnStop').style.display = 'none';
-    });
-}
-
-function start() {
-    document.getElementById('offerError').style.display = 'none';
-    const config = { sdpSemantics: 'unified-plan' };
-    if (document.getElementById('use-stun')?.checked) {
-        config.iceServers = [{ urls: 'stun:stun.l.google.com:19302' }];
-    }
-    pc = new RTCPeerConnection(config);
-    pc.addEventListener('track', evt => {
-        if (evt.track.kind === 'video') document.getElementById('video').srcObject = evt.streams[0];
-        else document.getElementById('audio').srcObject = evt.streams[0];
-    });
-    pc.addEventListener('connectionstatechange', () => {
-        if (pc.connectionState === 'connected') updateStatus(true);
-        else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') { updateStatus(false); setSessionId(null); }
-    });
-    negotiate();
-    document.getElementById('btnStart').style.display = 'none';
-    document.getElementById('btnStop').style.display = 'inline-block';
-}
-
-function stop() {
-    if (pc) { pc.close(); pc = null; }
-    updateStatus(false);
-    setSessionId(null);
-    document.getElementById('btnStart').style.display = 'inline-block';
-    document.getElementById('btnStop').style.display = 'none';
-    document.getElementById('video').srcObject = null;
-    document.getElementById('audio').srcObject = null;
-}
-
-// ─── Text ──────────────────────────────────────────────────
-function sendText() {
-    const text = document.getElementById('txtMessage').value;
-    const type = document.getElementById('txtType').value;
-    const interrupt = document.getElementById('txtInterrupt').checked;
-    if (!text || !sessionid) return alert('请先连接 WebRTC');
-
-    fetch('/human', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, type, interrupt, sessionid: String(sessionid) }),
-    }).then(r => r.json()).then(d => {
-        console.log('human:', d);
-        document.getElementById('txtMessage').value = '';
-    });
-}
-
-// ─── Audio Upload ──────────────────────────────────────────
-function uploadAudio() {
-    const file = document.getElementById('audioFile').files[0];
-    if (!file || !sessionid) return alert('请先连接 WebRTC 并选择音频文件');
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('sessionid', String(sessionid));
-
-    fetch('/humanaudio', { method: 'POST', body: formData })
-        .then(r => r.json()).then(d => console.log('humanaudio:', d));
-}
-
-// ─── Interrupt ─────────────────────────────────────────────
-function interrupt() {
-    if (!sessionid) return;
-    fetch('/interrupt_talk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionid: String(sessionid) }),
-    }).then(r => r.json()).then(d => console.log('interrupt:', d));
-}
-
-// ─── Speaking Status ───────────────────────────────────────
-function checkSpeaking() {
-    if (!sessionid) return alert('请先连接 WebRTC');
-    fetch('/is_speaking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionid: String(sessionid) }),
-    }).then(r => r.json()).then(d => alert('Speaking: ' + JSON.stringify(d.data)));
-}
-
-// ─── Recording ─────────────────────────────────────────────
-let recording = false;
-function toggleRecord() {
-    if (!sessionid) return alert('请先连接 WebRTC');
-    const btn = document.getElementById('btnRecToggle');
-    const type = recording ? 'end_record' : 'start_record';
-    fetch('/record', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, sessionid: String(sessionid) }),
-    }).then(r => r.json()).then(d => {
-        console.log(type + ':', d);
-        recording = !recording;
-        if (recording) {
-            btn.className = 'btn-danger-custom btn-sm';
-            btn.innerHTML = '<i class="bi bi-stop-circle"></i> 停止录制';
-            document.getElementById('btnDownload').disabled = true;
-        } else {
-            btn.className = 'btn-outline-custom btn-sm';
-            btn.innerHTML = '<i class="bi bi-record-circle"></i> 开始录制';
-            document.getElementById('btnDownload').disabled = false;
-        }
-    });
-}
-function downloadRecord() {
-    if (!sessionid) return;
-    window.open('/record/' + sessionid, '_blank');
-}
-
-// ─── Audiotype ─────────────────────────────────────────────
-function setAudiotype() {
-    if (!sessionid) return alert('请先连接 WebRTC');
-    const val = parseInt(document.getElementById('audiotypeVal').value) || 0;
-    fetch('/set_audiotype', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audiotype: val, sessionid: String(sessionid) }),
-    }).then(r => r.json()).then(d => console.log('set_audiotype:', d));
-}
-
-</script>
+    <section class="tools" aria-labelledby="toolsTitle">
+      <div class="tools-head"><h2 id="toolsTitle">更多交流方式</h2><span>按需使用的数字人工具</span></div>
+      <div class="tool-grid">
+        <section class="tool"><h3>上传语音</h3><p>用已有音频驱动数字人播报。支持服务端可解码的音频文件。</p><label class="field-label" for="audioFile">选择音频文件</label><input class="control" type="file" id="audioFile" accept="audio/*"><button type="button" class="btn btn-soft" id="btnUpload" disabled>上传并播放</button></section>
+        <section class="tool"><h3>播报控制</h3><p>打断当前播报，或查询数字人是否正在说话。</p><div class="button-row"><button type="button" class="btn btn-soft" id="btnInterrupt" disabled>打断播报</button><button type="button" class="btn btn-outline" id="btnSpeaking" disabled>查看状态</button></div></section>
+        <section class="tool"><h3>会话录制</h3><p>录制服务端渲染的音视频，并在结束后下载 MP4。</p><div class="button-row"><button type="button" class="btn btn-soft" id="btnRecToggle" disabled>开始录制</button><button type="button" class="btn btn-outline" id="btnDownload" disabled>下载录像</button></div></section>
+      </div>
+      <details class="settings"><summary>形象与高级设置</summary><div class="settings-content">
+        <div class="settings-grid"><label class="field" for="offerAvatar"><span class="field-label">Avatar ID <small>使用服务端已生成的形象</small></span><input class="control" id="offerAvatar" placeholder="由服务端配置决定"></label><label class="field" for="offerRefAudio"><span class="field-label">参考音色</span><input class="control" id="offerRefAudio" placeholder="由服务端配置决定"></label><label class="field" for="offerRefText"><span class="field-label">参考音频文本</span><input class="control" id="offerRefText" placeholder="可选"></label></div>
+        <p class="setting-note" id="modelHint">正在读取服务端形象配置…</p>
+        <div class="button-row"><a class="btn btn-outline" href="/avatar.html">打开形象管理</a><a class="btn btn-outline" href="/tts/index.html">打开语音管理</a></div>
+        <p class="setting-note">默认的 teacher-tutor 形象适用于 Wav2Lip。切换其他模型时，请在形象管理中准备该模型对应的 Avatar。</p>
+        <div class="settings-grid"><label class="field" for="audiotypeVal"><span class="field-label">动作片段索引</span><input class="control" type="number" id="audiotypeVal" value="2" min="2"></label></div>
+        <div class="button-row bottom-actions"><button type="button" class="btn btn-outline" id="btnAudiotype" disabled>切换动作片段</button></div>
+        <p class="setting-note">动作片段需由服务端预先配置；仅填写索引不会创建新动作。</p>
+      </div></details>
+    </section>
+    <footer class="footer"><span>智学同行 · 教育数字人讲解</span><span>完整教学功能请使用 DeepTutor 主应用</span></footer>
+  </main>
 </body>
 </html>

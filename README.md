@@ -4,6 +4,18 @@
 
 中文版 ｜ [English](./README-EN.md)
 
+## 教育智能体融合版
+
+本项目现在以 `education/` 中的 DeepTutor 为主应用，新增侧边栏“数字人讲解”入口：DeepTutor 自己的 API 处理教学问题并保持学习会话，LiveTalking 负责教师数字人的 WebRTC 画面和语音播报。数字人服务的独立调试首页也已改为教育场景。架构、部署前准备与截图能力对照见 [融合说明](docs/education-platform.md)。
+
+主应用还提供语音提问转写、到期复习概览和“教学分析”页面。班级统计只包含使用邀请码主动加入的学生，展示真实练习、低掌握知识点及结构化错误类型。
+
+教学页面现已加入学生自选卡点引导、真实检索资料展示和讲解后的单题检验。检验题使用 DeepTutor 原有出题流程，提交后进入账号内的练习记录，答错题由 Practice 安排复习；教学分析根据已保存的练习和掌握路径记录给出下一步建议。
+
+可直接打开 [融合界面外观预览](web/platform-preview.html) 查看页面设计；这是静态预览，实际交互入口是 DeepTutor 主应用的 `/digital-human` 页面。
+
+`models/` 当前没有 Wav2Lip 权重；算力云部署时按原 LiveTalking 说明提供模型文件。教师单帧 Avatar 已准备在 `data/avatars/teacher-tutor/`，原图在 `web/assets/teacher-avatar.png`。本次未安装本机依赖或启动 GPU 推理服务。
+
 
 <p align="center">
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
@@ -88,16 +100,24 @@ Linux CUDA 环境搭建参考: <https://zhuanlan.zhihu.com/p/674972886>
 | Google Drive | <https://drive.google.com/drive/folders/1FOC_MD6wdogyyX_7V1d4NDIO7P9NlSAJ?usp=sharing> |
 
 1. 将 `wav2lip256.pth` 拷贝到项目的 `models/` 目录下，重命名为 `wav2lip.pth`
-2. 将 `wav2lip256_avatar1.tar.gz` 解压后整个文件夹拷贝到 `data/avatars/` 目录下
+2. 项目已内置教育主题的 `teacher-tutor` 教师形象数据；如需使用上游示例形象，可另行将 `wav2lip256_avatar1.tar.gz` 解压到 `data/avatars/`。
 
 ### 2.2 启动服务
 
 ```bash
-python app.py --transport webrtc --model wav2lip --avatar_id wav2lip256_avatar1
+python app.py --transport webrtc --model wav2lip --avatar_id teacher-tutor
 ```
 
 
 >  **注意**: 服务端需开放端口 TCP:8010, UDP:1-65536  
+
+**预留的本地 Qwen 接口：** 在 `config.yaml` 的 LLM 区填写 `llm_base_url` 和 `llm_model`，并保持 `llm_provider: local`。地址需由 LiveTalking 服务端访问，指向兼容 OpenAI 的 `/v1` 根路径；模型名需与部署服务暴露的 ID 完全一致。若服务需要鉴权，在 `.env` 中填写 `LOCAL_LLM_API_KEY`；无鉴权可留空。当前留空时，智能回答会返回清晰的配置错误，原文播报仍可使用。若部署服务不是 OpenAI 兼容协议，需要按实际协议扩展 `llm.py`。
+
+```yaml
+llm_provider: local
+llm_base_url: 'http://<模型服务地址>/v1'
+llm_model: '<部署服务暴露的模型ID>'
+```
 
 
 ### 2.3 客户端接入

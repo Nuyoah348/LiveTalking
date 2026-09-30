@@ -1,0 +1,8 @@
+# Guardrail for the CPU-only setup stage. If any dependency requires one of
+# these GPU/model runtimes, pip must fail instead of installing it implicitly.
+torch===0
+torchvision===0
+torchaudio===0
+funasr===0
+vllm===0
+sentence-transformers===0

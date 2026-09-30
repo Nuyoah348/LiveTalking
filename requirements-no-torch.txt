@@ -1,0 +1,22 @@
+# CPU-safe runtime dependencies for the digital-human gateway.
+# GPU/model packages are installed later after the cloud instance is switched
+# to GPU mode. Keep torch, torchvision, torchaudio, FunASR, vLLM,
+# transformers, diffusers and accelerate out of this file.
+python-dotenv
+pyyaml
+numpy
+tqdm
+scipy
+resampy
+soundfile==0.12.1
+einops
+edge_tts
+flask
+opencv-python-headless
+aiortc
+aiohttp_cors
+librosa
+openai
+# DeepTutor's current Uvicorn/OpenAI agent stack requires a newer WebSocket API.
+websockets>=15.0.1,<17
+dashscope

@@ -80,9 +80,11 @@ def parse_args():
 
     # ─── LLM ──────────────────────────────────────────────────────────
     parser.add_argument('--llm_provider', type=str, default='dashscope',
-                        help="llm provider: dashscope/orcarouter")
+                        help="llm provider: local/dashscope/orcarouter")
     parser.add_argument('--llm_model', type=str, default='',
-                        help="llm model override, empty = provider default (qwen-plus / orcarouter/auto)")
+                        help="model ID; required for local provider, empty = cloud provider default")
+    parser.add_argument('--llm_base_url', type=str, default='',
+                        help="OpenAI-compatible local model API base URL, for example http://127.0.0.1:8000/v1")
 
     # ─── 传输 ─────────────────────────────────────────────────────────
     parser.add_argument('--transport', type=str, default='webrtc',
@@ -94,6 +96,8 @@ def parse_args():
     parser.add_argument('--max_session', type=int, default=5)
     parser.add_argument('--listenport', type=int, default=8010,
                         help="web listen port")
+    parser.add_argument('--listenhost', type=str, default='0.0.0.0',
+                        help="HTTP listen address; use 127.0.0.1 behind the DeepTutor proxy")
 
     # ─── 虚拟摄像头 ───────────────────────────────────────────────────
     parser.add_argument('--audio_output_device', type=int, default=None,

@@ -10,7 +10,7 @@ r: 10
 
 # -------- Avatar Model ----------------------------------------------------------
 model: wav2lip                 # musetalk / wav2lip / ultralight
-avatar_id: wav2lip256_avatar1
+avatar_id: teacher-tutor
 batch_size: 16
 
 # -------- Custom Actions ----------------------------------------------------------
@@ -18,13 +18,14 @@ customvideo_config: ''
 
 # -------- TTS ----------------------------------------------------------
 tts: edgetts                   # edgetts / gpt-sovits / cosyvoice / fishtts / tencent / doubao / indextts2 / azuretts / qwentts
-REF_FILE: ''                   # voice name or reference audio file path (wav, 16kHz, mono)
+REF_FILE: zh-CN-XiaomengNeural # Mandarin voice for the teacher avatar
 REF_TEXT: ''                   # reference text for voice cloning (English or Chinese)
 TTS_SERVER: ''                 # TTS server URL, no trailing slash
 
 # -------- LLM ----------------------------------------------------------
-llm_provider: dashscope        # dashscope / orcarouter
-llm_model: ''                  # model override, empty = provider default (qwen-plus / orcarouter/auto)
+llm_provider: local            # local / dashscope / orcarouter
+llm_base_url: 'http://127.0.0.1:8000/v1'
+llm_model: 'Qwen3-8B'
 
 # -------- Transport ----------------------------------------------------------
 transport: webrtc              # rtcpush / webrtc / rtmp / virtualcam

@@ -50,6 +50,14 @@ async def human(request):
         if avatar_session is None:
             return json_error("session not found")
 
+        if params['type'] == 'chat':
+            from llm import configuration_error
+            error = configuration_error(avatar_session.opt)
+            if error:
+                return json_error(error)
+            if not request.app.get("llm_response"):
+                return json_error("大模型服务未启用")
+
         if params.get('interrupt'):
             avatar_session.flush_talk()
 
@@ -61,10 +69,9 @@ async def human(request):
             avatar_session.put_msg_txt(params['text'], datainfo)
         elif params['type'] == 'chat':
             llm_response = request.app.get("llm_response")
-            if llm_response:
-                asyncio.get_event_loop().run_in_executor(
-                    None, llm_response, params['text'], avatar_session, datainfo
-                )
+            asyncio.get_event_loop().run_in_executor(
+                None, llm_response, params['text'], avatar_session, datainfo
+            )
 
         return json_ok()
     except Exception as e:
@@ -84,6 +91,20 @@ async def interrupt_talk(request):
         return json_ok()
     except Exception as e:
         logger.exception('interrupt_talk exception:')
+        return json_error(str(e))
+
+
+async def close_session(request):
+    """Release a WebRTC avatar session when its browser window closes."""
+    try:
+        params = await request.json()
+        sessionid = params.get('sessionid', '')
+        if not isinstance(sessionid, str) or not sessionid:
+            return json_error("sessionid is required")
+        await request.app['rtc_manager'].close_session(sessionid)
+        return json_ok()
+    except Exception as e:
+        logger.exception('close_session exception:')
         return json_error(str(e))
 
 
@@ -245,6 +266,7 @@ def setup_routes(app):
     """注册所有路由到 aiohttp app"""
     app.router.add_get("/", index)
     app.router.add_post("/human", human)
+    app.router.add_post("/close", close_session)
     app.router.add_post("/humanaudio", humanaudio)
     app.router.add_post("/set_audiotype", set_audiotype)
     app.router.add_post("/record", record)

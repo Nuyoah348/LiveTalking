@@ -38,6 +38,7 @@ class RTCManager:
         """
         self.opt = opt
         self.pcs: set = set()
+        self.session_pcs: Dict[str, RTCPeerConnection] = {}
 
     async def _create_pc_and_answer(self, avatar_session, sessionid, offer):
         """创建 PeerConnection、添加轨道、SDP 交换，返回已完成 answer 的 pc"""
@@ -46,34 +47,52 @@ class RTCManager:
             configuration=RTCConfiguration(iceServers=[ice_server])
         )
         self.pcs.add(pc)
+        self.session_pcs[sessionid] = pc
 
         @pc.on("connectionstatechange")
         async def on_connectionstatechange():
             logger.info("Connection state is %s", pc.connectionState)
             if pc.connectionState in ("failed", "closed"):
-                await pc.close()
-                self.pcs.discard(pc)
-                session_manager.remove_session(sessionid)
+                if self.session_pcs.get(sessionid) is pc:
+                    await self.close_session(sessionid)
+                else:
+                    self.pcs.discard(pc)
 
-        # 添加发送轨道
-        from server.webrtc import HumanPlayer
-        player = HumanPlayer(avatar_session)
-        pc.addTrack(player.audio)
-        pc.addTrack(player.video)
+        try:
+            # 添加发送轨道
+            from server.webrtc import HumanPlayer
+            player = HumanPlayer(avatar_session)
+            pc.addTrack(player.audio)
+            pc.addTrack(player.video)
 
-        # 设置编解码器偏好
-        capabilities = RTCRtpSender.getCapabilities("video")
-        preferences = list(filter(lambda x: x.name == "H264", capabilities.codecs))
-        preferences += list(filter(lambda x: x.name == "VP8", capabilities.codecs))
-        preferences += list(filter(lambda x: x.name == "rtx", capabilities.codecs))
-        transceiver = pc.getTransceivers()[1]
-        transceiver.setCodecPreferences(preferences)
+            # 设置编解码器偏好
+            capabilities = RTCRtpSender.getCapabilities("video")
+            preferences = list(filter(lambda x: x.name == "H264", capabilities.codecs))
+            preferences += list(filter(lambda x: x.name == "VP8", capabilities.codecs))
+            preferences += list(filter(lambda x: x.name == "rtx", capabilities.codecs))
+            transceiver = pc.getTransceivers()[1]
+            transceiver.setCodecPreferences(preferences)
 
-        await pc.setRemoteDescription(offer)
-        answer = await pc.createAnswer()
-        await pc.setLocalDescription(answer)
+            await pc.setRemoteDescription(offer)
+            answer = await pc.createAnswer()
+            await pc.setLocalDescription(answer)
+        except Exception:
+            await self.close_session(sessionid)
+            raise
 
         return pc
+
+    async def close_session(self, sessionid: str) -> bool:
+        """Close one browser's peer and release its avatar immediately."""
+        pc = self.session_pcs.pop(sessionid, None)
+        if pc is None:
+            return False
+        try:
+            await pc.close()
+        finally:
+            self.pcs.discard(pc)
+            session_manager.remove_session(sessionid)
+        return True
 
     async def handle_offer(self, request):
         """处理 WebRTC offer 信令"""
@@ -177,3 +196,6 @@ class RTCManager:
         coros = [pc.close() for pc in self.pcs]
         await asyncio.gather(*coros)
         self.pcs.clear()
+        for sessionid in list(self.session_pcs):
+            session_manager.remove_session(sessionid)
+        self.session_pcs.clear()

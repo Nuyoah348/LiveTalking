@@ -16,6 +16,15 @@ data_utils/face_parsing/79999_iter.pth
 
 pretrained
 *.mp4
+!web/assets/doctor-avatar-source.mp4
+!data/
+data/*
+!data/avatars/
+data/avatars/*
+!data/avatars/clinic-doctor/
+!data/avatars/clinic-doctor/**
+!data/avatars/teacher-tutor/
+!data/avatars/teacher-tutor/**
 .DS_Store
 workspace/log_ngp.txt
 .idea
